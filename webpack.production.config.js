@@ -4,13 +4,23 @@ const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
-    entry: './src/index.js',
+    entry: {
+        'hello-world': './src/hello-world.js',
+        'content': './src/page-content.js'
+    },
     output: {
-        filename: 'bundle.[contenthash].js',
+        filename: '[name].[contenthash].js',
         path: path.resolve(__dirname, './dist'),
         publicPath: ''
     },
     mode: 'production',
+    optimization: {
+        splitChunks: {
+            chunks: 'all',
+            minSize: 10000,
+            automaticNameDelimiter: '_'
+        }
+    },
     module: {
         rules: [
             {
@@ -38,7 +48,7 @@ module.exports = {
                     loader: 'babel-loader',
                     options: {
                         presets: [ '@babel/env' ],
-                        plugins: [ '@babel/plugin-proposal-class-properties' ]
+                        plugins: [ 'transform-class-properties' ]
                     }
                 }
             },
@@ -52,13 +62,22 @@ module.exports = {
     },
     plugins: [
         new MiniCssExtractPlugin({
-            filename: 'styles.[contenthash].css'
+            filename: '[name].[contenthash].css'
         }),
         new CleanWebpackPlugin(),
         new HtmlWebpackPlugin({
+            filename: 'hello-world.html',
+            chunks: ['hello-world', 'vendors_content_hello-world'],
             title: 'Hello world',
-            template: 'src/index.hbs',
-            description: 'some description'
+            description: 'Hello world',
+            template: 'src/index.hbs'
+        }),
+        new HtmlWebpackPlugin({
+            filename: 'content.html',
+            chunks: ['content', 'vendors_content_hello-world'],
+            title: 'Content',
+            description: 'Content',
+            template: 'src/index.hbs'
         })
     ]
 };
